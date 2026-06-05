@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily English Chat</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f5f5f0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .app-card {
+      width: 100%;
+      max-width: 680px;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 0.5px solid #e0e0d8;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      padding: 1.1rem 1.5rem 0.9rem;
+      border-bottom: 0.5px solid #e0e0d8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .app-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: #1a1a1a;
+      letter-spacing: -0.3px;
+    }
+    .app-title span { font-style: italic; color: #1D9E75; }
+    .level-badge {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #E1F5EE;
+      color: #0F6E56;
+      letter-spacing: 0.5px;
+    }
+
+    .api-section {
+      padding: 0.7rem 1.5rem;
+      background: #f9f9f6;
+      border-bottom: 0.5px solid #e0e0d8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .api-section input {
+      flex: 1;
+      font-size: 13px;
+      padding: 6px 10px;
+      border: 0.5px solid #d0d0c8;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1a1a1a;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+    }
+    .api-section input:focus { border-color: #1D9E75; }
+    .api-section input::placeholder { color: #aaa; }
+    .api-save-btn {
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 0.5px solid #d0d0c8;
+      background: #ffffff;
+      color: #555;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+    }
+    .api-save-btn:hover { background: #f0f0ec; }
+    .api-status { font-size: 12px; color: #0F6E56; white-space: nowrap; }
+
+    .scene-bar {
+      padding: 0.65rem 1.5rem;
+      border-bottom: 0.5px solid #e0e0d8;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .scene-btn {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 0.5px solid #d0d0c8;
+      background: #f5f5f0;
+      color: #666;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .scene-btn:hover, .scene-btn.active {
+      background: #1D9E75;
+      color: white;
+      border-color: #1D9E75;
+    }
+
+    .chat-area {
+      overflow-y: auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 280px;
+      max-height: 340px;
+    }
+    .msg { display: flex; flex-direction: column; gap: 4px; max-width: 85%; }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.ai { align-self: flex-start; align-items: flex-start; }
+    .msg-bubble {
+      padding: 9px 13px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a1a;
+    }
+    .msg.user .msg-bubble {
+      background: #1D9E75;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.ai .msg-bubble {
+      background: #f5f5f0;
+      border-bottom-left-radius: 4px;
+      border: 0.5px solid #e0e0d8;
+    }
+    .feedback-box {
+      font-size: 12px;
+      padding: 7px 11px;
+      border-radius: 8px;
+      border-left: 2px solid #1D9E75;
+      background: #E1F5EE;
+      color: #085041;
+      line-height: 1.6;
+      max-width: 92%;
+    }
+    .feedback-label {
+      font-size: 10px;
+      font-weight: 500;
+      color: #0F6E56;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .typing-indicator {
+      display: none;
+      align-self: flex-start;
+      padding: 9px 13px;
+      background: #f5f5f0;
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      border: 0.5px solid #e0e0d8;
+      gap: 4px;
+    }
+    .typing-indicator.show { display: flex; }
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #aaa;
+      animation: bounce 1.2s infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%,60%,100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+
+    .hint-bar {
+      padding: 0.4rem 1.5rem 0.6rem;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .hint-chip {
+      font-size: 12px;
+      padding: 3px 11px;
+      border-radius: 20px;
+      border: 0.5px solid #e0e0d8;
+      color: #666;
+      cursor: pointer;
+      background: #ffffff;
+      transition: all 0.15s;
+    }
+    .hint-chip:hover { border-color: #1D9E75; color: #0F6E56; background: #E1F5EE; }
+
+    .voice-bar {
+      padding: 0.9rem 1.5rem;
+      border-top: 0.5px solid #e0e0d8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      background: #f9f9f6;
+    }
+    .mic-btn {
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      border: none;
+      background: #1D9E75;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-size: 24px;
+    }
+    .mic-btn:hover { background: #0F6E56; }
+    .mic-btn.recording { background: #E24B4A; animation: pulse 1s infinite; }
+    .mic-btn.disabled { background: #ccc; cursor: not-allowed; }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(226,75,74,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(226,75,74,0); }
+    }
+    .voice-status {
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      min-height: 18px;
+    }
+    .voice-status.recording { color: #E24B4A; font-weight: 500; }
+    .voice-toggle-row { display: flex; gap: 16px; align-items: center; }
+    .toggle-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+    }
+    .toggle-item input[type=checkbox] { width: 14px; height: 14px; accent-color: #1D9E75; cursor: pointer; }
+    .speak-btn {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 0.5px solid #d0d0c8;
+      background: #ffffff;
+      color: #666;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .speak-btn:hover { border-color: #1D9E75; color: #0F6E56; }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      width: 100%;
+    }
+    .input-row textarea {
+      flex: 1;
+      padding: 9px 13px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid #d0d0c8;
+      border-radius: 16px;
+      background: #ffffff;
+      color: #1a1a1a;
+      resize: none;
+      line-height: 1.5;
+      min-height: 40px;
+      max-height: 90px;
+      outline: none;
+    }
+    .input-row textarea:focus { border-color: #1D9E75; }
+    .input-row textarea::placeholder { color: #aaa; }
+    .send-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: #1D9E75;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+    .send-btn:hover { background: #0F6E56; }
+    .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 14px;
+      gap: 8px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 0; }
+      .app-card { border-radius: 0; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-card">
+  <div class="app-header">
+    <p class="app-title">Daily <span>English</span> Chat <span style="font-size:14px;font-style:normal">🎤</span></p>
+    <span class="level-badge">BEGINNER · VOICE</span>
+  </div>
+
+  <div class="api-section">
+    <i class="ti ti-key" style="color:#aaa;font-size:16px"></i>
+    <input type="password" id="apiKeyInput" placeholder="Anthropic APIキーを入力 (sk-ant-...)" autocomplete="off" />
+    <button class="api-save-btn" onclick="saveApiKey()">保存</button>
+    <span class="api-status" id="apiStatus" style="display:none">✓ 設定済み</span>
+  </div>
+
+  <div class="scene-bar">
+    <button class="scene-btn active" data-scene="free" onclick="setScene(this)">💬 自由会話</button>
+    <button class="scene-btn" data-scene="cafe" onclick="setScene(this)">☕ カフェ</button>
+    <button class="scene-btn" data-scene="shopping" onclick="setScene(this)">🛍️ ショッピング</button>
+    <button class="scene-btn" data-scene="intro" onclick="setScene(this)">👋 自己紹介</button>
+    <button class="scene-btn" data-scene="friend" onclick="setScene(this)">😊 友人との雑談</button>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="empty-state" id="emptyState">
+      <div style="font-size:36px">🎤</div>
+      <div>マイクボタンを押して英語で話しかけよう！</div>
+      <div style="font-size:12px">テキスト入力でも練習できます</div>
+    </div>
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+
+  <div class="hint-bar" id="hintBar">
+    <span style="font-size:12px;color:#aaa">例：</span>
+    <span class="hint-chip" onclick="useHint(this)">Hello!</span>
+    <span class="hint-chip" onclick="useHint(this)">How are you?</span>
+    <span class="hint-chip" onclick="useHint(this)">Nice to meet you.</span>
+    <span class="hint-chip" onclick="useHint(this)">What does that mean?</span>
+  </div>
+
+  <div class="voice-bar">
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="マイク">
+      <i class="ti ti-microphone"></i>
+    </button>
+    <div class="voice-status" id="voiceStatus">マイクボタンを押して話す</div>
+    <div class="voice-toggle-row">
+      <label class="toggle-item">
+        <input type="checkbox" id="autoSpeak" checked>
+        <span>AIの返答を自動で読み上げ</span>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" id="autoMic">
+        <span>返答後に自動でマイクON</span>
+      </label>
+    </div>
+    <div class="input-row">
+      <textarea id="userInput" placeholder="テキストで入力してもOK..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendText()" title="送信">
+        <i class="ti ti-send"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let apiKey = '';
+let messages = [];
+let currentScene = 'free';
+let recognition = null;
+let isRecording = false;
+let isSpeaking = false;
+let currentUtterance = null;
+
+const scenes = {
+  free: {
+    hints: ['Hello! How are you?', 'What did you do today?', 'I like...', 'Can you help me?'],
+    system: `You are a friendly, encouraging English conversation partner for Japanese beginners (A1-A2 level).
+- Use simple, short English (A1-A2). Max 2-3 sentences per response.
+- If the user writes in Japanese, gently respond in both Japanese and English.
+- After your English response, ALWAYS add:
+  【日本語訳】(Japanese translation of your English)
+  【ひとことアドバイス】(1 short tip in Japanese about a useful expression or correction)
+- Be warm, patient, and encouraging.`
+  },
+  cafe: {
+    hints: ['Can I have a coffee?', 'What do you recommend?', 'For here, please.', 'How much is it?'],
+    system: `You are a friendly café staff member. The user is a Japanese beginner practicing ordering at a café.
+- Play the role of café staff. Keep it simple (A1-A2).
+- After your English response, add:
+  【日本語訳】(translation)
+  【ひとことアドバイス】(useful café vocabulary tip in Japanese)
+- Start by greeting the customer warmly.`
+  },
+  shopping: {
+    hints: ['How much is this?', 'Do you have this in blue?', "I'm just looking.", 'Can I try this on?'],
+    system: `You are a helpful shop assistant. Simple English only (A1-A2).
+- After your English, add:
+  【日本語訳】(translation)
+  【ひとことアドバイス】(shopping phrase tip in Japanese)
+- Start by greeting the customer.`
+  },
+  intro: {
+    hints: ['My name is...', 'I live in Japan.', 'I like music.', 'Nice to meet you!'],
+    system: `You are a friendly English speaker meeting a Japanese person for the first time.
+- Help practice self-introductions. Simple English (A1-A2).
+- After your English, add:
+  【日本語訳】(translation)
+  【ひとことアドバイス】(self-introduction tip in Japanese)
+- Start by introducing yourself briefly and asking their name.`
+  },
+  friend: {
+    hints: ['What do you do on weekends?', 'I love Japanese food!', 'Have you seen any good movies?', 'Tell me about yourself.'],
+    system: `You are a friendly foreign friend chatting casually with a Japanese beginner.
+- Casual, friendly tone. Very simple English (A1-A2).
+- After your English, add:
+  【日本語訳】(translation)
+  【ひとことアドバイス】(casual English phrase tip in Japanese)
+- Start with a casual, friendly opener.`
+  }
+};
+
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (val.startsWith('sk-ant-') || val.startsWith('sk-')) {
+    apiKey = val;
+    try { localStorage.setItem('ec_apikey_v2', val); } catch(e) {}
+    document.getElementById('apiStatus').style.display = 'inline';
+    document.getElementById('apiKeyInput').value = '●'.repeat(20);
+  } else {
+    alert('APIキーは sk-ant- で始まる形式で入力してください');
+  }
+}
+
+function loadApiKey() {
+  try {
+    const saved = localStorage.getItem('ec_apikey_v2') || localStorage.getItem('ec_apikey');
+    if (saved) {
+      apiKey = saved;
+      document.getElementById('apiKeyInput').value = '●'.repeat(20);
+      document.getElementById('apiStatus').style.display = 'inline';
+    }
+  } catch(e) {}
+}
+
+function setScene(btn) {
+  document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentScene = btn.dataset.scene;
+  messages = [];
+  stopSpeaking();
+  document.getElementById('chatArea').innerHTML = `
+    <div class="empty-state" id="emptyState">
+      <div style="font-size:28px">✨</div>
+      <div style="font-weight:500">${btn.textContent.trim()}を開始！</div>
+      <div style="font-size:12px">AIが話しかけてきます</div>
+    </div>
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>`;
+  updateHints();
+  if (currentScene !== 'free') setTimeout(() => callAI('[START_SCENE]', true), 400);
+}
+
+function updateHints() {
+  const bar = document.getElementById('hintBar');
+  bar.innerHTML = '<span style="font-size:12px;color:#aaa">例：</span>' +
+    scenes[currentScene].hints.map(h => `<span class="hint-chip" onclick="useHint(this)">${h}</span>`).join('');
+}
+
+function useHint(el) {
+  document.getElementById('userInput').value = el.textContent;
+  document.getElementById('userInput').focus();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+
+function sendText() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!apiKey) { alert('上部のAPIキー欄にAnthropicのAPIキーを入力してください。\nconsole.anthropic.comで取得できます。'); return; }
+  addUserMessage(text);
+  input.value = '';
+  input.style.height = 'auto';
+  callAI(text, false);
+}
+
+function toggleMic() {
+  if (!apiKey) { alert('先にAPIキーを設定してください。'); return; }
+  if (isRecording) { stopMic(); return; }
+  if (isSpeaking) stopSpeaking();
+  startMic();
+}
+
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    alert('このブラウザは音声入力に対応していません。\nChrome または Edge をお使いください。');
+    return;
+  }
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('micBtn').innerHTML = '<i class="ti ti-square-filled"></i>';
+    setStatus('🔴 聞いています... 英語で話してください', true);
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    if (interim) setStatus('🎤 ' + interim, true);
+    if (final) {
+      document.getElementById('userInput').value = final;
+      stopMic();
+      setTimeout(() => sendText(), 200);
+    }
+  };
+
+  recognition.onerror = (e) => {
+    stopMic();
+    if (e.error === 'not-allowed') setStatus('マイクの使用が許可されていません。ブラウザの設定を確認してください。', false);
+    else if (e.error === 'no-speech') setStatus('音声が検出されませんでした。もう一度お試しください。', false);
+    else setStatus('音声認識エラー: ' + e.error, false);
+  };
+
+  recognition.onend = () => { if (isRecording) stopMic(); };
+  recognition.start();
+}
+
+function stopMic() {
+  if (recognition) { try { recognition.stop(); } catch(e) {} recognition = null; }
+  isRecording = false;
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micBtn').innerHTML = '<i class="ti ti-microphone"></i>';
+  setStatus('マイクボタンを押して話す', false);
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  stopSpeaking();
+  const cleanText = text.replace(/【[\s\S]*$/, '').trim();
+  if (!cleanText) return;
+  currentUtterance = new SpeechSynthesisUtterance(cleanText);
+  currentUtterance.lang = 'en-US';
+  currentUtterance.rate = 0.88;
+  currentUtterance.pitch = 1.0;
+
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Female'))
+    || voices.find(v => v.lang.startsWith('en-US'))
+    || voices.find(v => v.lang.startsWith('en'));
+  if (enVoice) currentUtterance.voice = enVoice;
+
+  currentUtterance.onstart = () => { isSpeaking = true; setStatus('🔊 読み上げ中...', false); };
+  currentUtterance.onend = () => {
+    isSpeaking = false;
+    currentUtterance = null;
+    setStatus('マイクボタンを押して話す', false);
+    if (document.getElementById('autoMic').checked) setTimeout(startMic, 500);
+  };
+  currentUtterance.onerror = () => { isSpeaking = false; currentUtterance = null; };
+  window.speechSynthesis.speak(currentUtterance);
+}
+
+function stopSpeaking() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  isSpeaking = false;
+  currentUtterance = null;
+}
+
+function setStatus(msg, isRec) {
+  const el = document.getElementById('voiceStatus');
+  el.textContent = msg;
+  el.className = 'voice-status' + (isRec ? ' recording' : '');
+}
+
+function addUserMessage(text) {
+  const empty = document.getElementById('emptyState');
+  if (empty) empty.remove();
+  const area = document.getElementById('chatArea');
+  const typing = document.getElementById('typingIndicator');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="msg-bubble">${escHtml(text)}</div>`;
+  area.insertBefore(div, typing);
+  area.scrollTop = area.scrollHeight;
+}
+
+function addAIMessage(text) {
+  const empty = document.getElementById('emptyState');
+  if (empty) empty.remove();
+  const area = document.getElementById('chatArea');
+  const typing = document.getElementById('typingIndicator');
+  const parts = parseAI(text);
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  const speakText = JSON.stringify(parts.english);
+  div.innerHTML = `<div class="msg-bubble">${escHtml(parts.english)} <button class="speak-btn" onclick="speak(${speakText})"><i class="ti ti-volume"></i></button></div>`;
+  area.insertBefore(div, typing);
+  if (parts.japanese || parts.advice) {
+    const fb = document.createElement('div');
+    fb.className = 'feedback-box';
+    let html = '';
+    if (parts.japanese) html += `<div class="feedback-label">🇯🇵 日本語訳</div><div>${escHtml(parts.japanese)}</div>`;
+    if (parts.advice) html += `<div class="feedback-label" style="margin-top:5px">💡 アドバイス</div><div>${escHtml(parts.advice)}</div>`;
+    fb.innerHTML = html;
+    area.insertBefore(fb, typing);
+  }
+  area.scrollTop = area.scrollHeight;
+  if (document.getElementById('autoSpeak').checked) {
+    setTimeout(() => speak(parts.english), 300);
+  }
+}
+
+function parseAI(text) {
+  const jpMatch = text.match(/【日本語訳】([\s\S]*?)(?=【ひとことアドバイス】|$)/);
+  const advMatch = text.match(/【ひとことアドバイス】([\s\S]*?)$/);
+  const english = text.split('【日本語訳】')[0].trim();
+  return {
+    english: english || text,
+    japanese: jpMatch ? jpMatch[1].trim() : '',
+    advice: advMatch ? advMatch[1].trim() : ''
+  };
+}
+
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+}
+
+function showTyping(show) {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.className = 'typing-indicator' + (show ? ' show' : '');
+  document.getElementById('sendBtn').disabled = show;
+  document.getElementById('micBtn').className = 'mic-btn' + (show ? ' disabled' : '');
+}
+
+async function callAI(userText, isSceneStart) {
+  showTyping(true);
+  if (!isSceneStart) messages.push({ role: 'user', content: userText });
+  const sendMessages = isSceneStart
+    ? [{ role: 'user', content: 'Please start the scene and greet me.' }]
+    : messages;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        system: scenes[currentScene].system,
+        messages: sendMessages
+      })
+    });
+    if (!res.ok) {
+      const e = await res.json();
+      throw new Error(e.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const reply = data.content[0].text;
+    if (!isSceneStart) messages.push({ role: 'assistant', content: reply });
+    showTyping(false);
+    addAIMessage(reply);
+  } catch(e) {
+    showTyping(false);
+    addAIMessage(`エラー: ${e.message}\n\nAPIキーを確認してください。`);
+  }
+}
+
+window.speechSynthesis?.addEventListener('voiceschanged', () => {});
+loadApiKey();
+updateHints();
+</script>
+</body>
+</html>
